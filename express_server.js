@@ -44,6 +44,11 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies["user_id"]] };
+  res.render("login", templateVars);
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
@@ -82,6 +87,11 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  // for (const user of users) {
+  //   if (req.body.email === users[user].email && req.body.password === users[user].password) {
+
+  //   }
+  // }
   const username = req.body.username;
   res.cookie('username', username);
   res.redirect("/urls");

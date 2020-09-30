@@ -11,8 +11,7 @@
     </div>
     <div style="display: flex; position: absolute; right: 1em;">
     <% if (!user) { %>
-      <form method="POST" action="/login">
-        <input type = "text" name = "username" style="margin: 1em">
+      <form method="GET" action="/login">
         <button class="btn btn-outline-dark" action = "submit">Login</button>
       </form>
     <% } else { %>
