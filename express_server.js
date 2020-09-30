@@ -61,6 +61,7 @@ app.post("/logout", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
+  console.log(req.body.longURL);
   console.log(urlDatabase);  // Log the POST request body to the console
   res.redirect(req.body.longURL);  // Redirect to new page *ERROR HERE FIX LATER
 });
