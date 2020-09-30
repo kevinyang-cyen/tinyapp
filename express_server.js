@@ -14,6 +14,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "abcdef": {
+    id: "abcdef", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "bcdefg": {
+    id: "bcdefg", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req,res) => {
   res.send("Hello!");
 });
@@ -26,6 +39,10 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = { username: req.cookies["username"] };
+  res.render("register", templateVars);
+});
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
@@ -45,6 +62,13 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+
+app.post("/register", (req, res) => {
+  let userID = generateRandomString();
+  users[userID] = {id: userID, email: req.body.email, password: req.body.password};
+  console.log(users);
+  res.redirect("urls");
 });
 
 app.post("/login", (req, res) => {
