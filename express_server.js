@@ -87,14 +87,20 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // for (const user of users) {
-  //   if (req.body.email === users[user].email && req.body.password === users[user].password) {
-
-  //   }
-  // }
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect("/urls");
+  for (const user in users) {
+    if (req.body.email === users[user].email) {
+      if (req.body.password === users[user].password) {
+        res.cookie('user_id', user);
+        res.redirect("/urls");
+        return;
+      }
+      else {
+        res.status(403).send('User email and password do not match!');
+        return;
+      }
+    }
+  }
+  res.status(403).send('User email not found!');
 });
 
 app.post("/logout", (req, res) => {

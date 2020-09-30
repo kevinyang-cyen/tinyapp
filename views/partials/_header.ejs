@@ -11,6 +11,9 @@
     </div>
     <div style="display: flex; position: absolute; right: 1em;">
     <% if (!user) { %>
+      <form method="GET" action="/register">
+        <button class="btn btn-outline-dark" action = "submit">Register</button>
+      </form>
       <form method="GET" action="/login">
         <button class="btn btn-outline-dark" action = "submit">Login</button>
       </form>
