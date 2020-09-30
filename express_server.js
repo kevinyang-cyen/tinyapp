@@ -1,14 +1,20 @@
+// TinyApp - A full stack web app built with Node and Express 
+// that allows users to shorten long URLs (à la bit.ly).
 const express = require("express");
-const app = express();
-const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser')
 
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+// Server Setup -----------------------------------
+const PORT = 8080; // default port 8080
+const app = express();
 app.set("view engine", "ejs");
 
+// Middleware
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+
+// Databases
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "abcdef"},
   "9sm5xK": { longURL: "http://www.google.com", userID: "abcdef"}
@@ -27,6 +33,7 @@ const users = {
   }
 }
 
+// Page Renders
 app.get("/", (req,res) => {
   res.send("Hello!");
 });
@@ -77,6 +84,8 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+
+// Posts
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.status(400).send('Please fill out an email and a password!');
@@ -119,9 +128,7 @@ app.post("/logout", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  console.log(req.body.longURL);
-  console.log(urlDatabase);  // Log the POST request body to the console
-  res.redirect(req.body.longURL);  // Redirect to new page *ERROR HERE FIX LATER
+  res.redirect(req.body.longURL);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -138,6 +145,8 @@ app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
 
+
+// Functions
 function generateRandomString() {
   return Math.random().toString(20).substr(2, 6);
 }
