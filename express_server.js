@@ -10,15 +10,15 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "abcdef"},
+  "9sm5xK": { longURL: "http://www.google.com", userID: "abcdef"}
 };
 
 const users = { 
   "abcdef": {
     id: "abcdef", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "temppassword"
   },
  "bcdefg": {
     id: "bcdefg", 
@@ -50,22 +50,30 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  const templateVars = { urls: urlsForUser(req.cookies["user_id"]), user: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    res.redirect("/login");
+    return;
+  }
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send('Short URL not found!');
+    return;
+  }
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, urls: urlsForUser(req.cookies["user_id"]), user: users[req.cookies["user_id"]], urlUserID: urlDatabase[req.params.shortURL].userID };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -117,12 +125,12 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  delete urlDatabase[req.params.shortURL].longURL;
   res.redirect("/urls");
 });
 
@@ -141,4 +149,14 @@ function emailLookUp(email) {
     }
   }
   return false;
+}
+
+function urlsForUser(id) {
+  let userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = {longURL : urlDatabase[shortURL].longURL };
+    }
+  }
+  return userURLs;
 }
