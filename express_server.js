@@ -103,6 +103,10 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // Path with shortURL to redirect to actual longURL website
 app.get("/u/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("ShortURL not found!");
+    return;
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
@@ -150,9 +154,12 @@ app.post("/logout", (req, res) => {
 
 // Adds generates new shortURL and redirects to actual page
 app.post("/urls", (req, res) => {
+  if (!req.session.user_id) {
+    res.response(403).send("Please log in!");
+  }
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(req.body.longURL);
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id};
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // Updates existing longURL for given shortURL
@@ -163,8 +170,14 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // Deletes a user shortURL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  if (!req.session.user_id) {
+    res.status(403).send("Login to delete shortURL!");
+  } else if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
+    res.status(403).send("You do not have permission to delete this shortURL!");
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  }
 });
 
 // Console logs when server begins listening
