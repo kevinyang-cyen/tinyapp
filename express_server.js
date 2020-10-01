@@ -1,4 +1,4 @@
-// TinyApp - A full stack web app built with Node and Express 
+// TinyApp - A full stack web app built with Node and Express
 // that allows users to shorten long URLs (à la bit.ly).
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -24,18 +24,18 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userID: "abcdef"}
 };
 
-const users = { 
+const users = {
   "abcdef": {
-    id: "abcdef", 
-    email: "user@example.com", 
+    id: "abcdef",
+    email: "user@example.com",
     password: bcrypt.hashSync("temppassword", 10)
   },
- "bcdefg": {
-    id: "bcdefg", 
-    email: "user2@example.com", 
+  "bcdefg": {
+    id: "bcdefg",
+    email: "user2@example.com",
     password: bcrypt.hashSync("dishwasher-funk", 10)
   }
-}
+};
 
 // GETs
 app.get("/", (req,res) => {
@@ -101,8 +101,7 @@ app.post("/register", (req, res) => {
   if (emailLookUp(req.body.email, users)) {
     res.status(400).send('Email already exists!');
     return;
-  }
-  else {
+  } else {
     let userID = generateRandomString();
     users[userID] = {id: userID, email: req.body.email, password: bcrypt.hashSync(req.body.password, 10)};
     req.session.user_id = userID;
@@ -118,8 +117,7 @@ app.post("/login", (req, res) => {
       req.session.user_id = user_id;
       res.redirect("/urls");
       return;
-    }
-    else {
+    } else {
       res.status(403).send('User email and password do not match!');
       return;
     }
@@ -129,7 +127,7 @@ app.post("/login", (req, res) => {
 
 // Clears session upon logout
 app.post("/logout", (req, res) => {
-  req.session = null
+  req.session = null;
   res.redirect("/urls");
 });
 
