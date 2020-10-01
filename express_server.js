@@ -6,7 +6,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const {getUserByEmail, emailLookUp, generateRandomString, urlsForUser} = require("./helper.js");
 
-// Server Setup -----------------------------------
+// Server Setup
 const PORT = 8080; // default port 8080
 const app = express();
 app.set("view engine", "ejs");
@@ -18,7 +18,7 @@ app.use(cookieSession({
   keys: ['secretkey1', 'secretkey2']
 }));
 
-// Databases
+// Sample Databases
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "abcdef"},
   "9sm5xK": { longURL: "http://www.google.com", userID: "abcdef"}
@@ -39,7 +39,11 @@ const users = {
 
 // GETs
 app.get("/", (req,res) => {
-  res.redirect("/urls");
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -48,20 +52,33 @@ app.get("/urls.json", (req, res) => {
 
 // Page render for user registration
 app.get("/register", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls");
+    return;
+  }
   const templateVars = { user: users[req.session.user_id] };
   res.render("register", templateVars);
 });
 
 // Page render for user login
 app.get("/login", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls");
+    return;
+  }
   const templateVars = { user: users[req.session.user_id] };
   res.render("login", templateVars);
 });
 
 // Page render for list of user urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlsForUser(req.session.user_id, urlDatabase), user: users[req.session.user_id] };
-  res.render("urls_index", templateVars);
+  if (req.session.user_id) {
+    const templateVars = { urls: urlsForUser(req.session.user_id, urlDatabase), user: users[req.session.user_id] };
+    res.render("urls_index", templateVars);
+    return;
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // Page render for creating a new shortURL
